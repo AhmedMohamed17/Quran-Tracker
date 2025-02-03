@@ -264,6 +264,10 @@ export default function KhatmaTracker() {
       {/* Footer */}
       <footer className="footer reem-kufi">
         <p> 🖤 إهداء لصديقي العزيز محمد سيد حسنين</p>
+        <p>
+          Dieses Werk ist meinem lieben Freund Muhammad Sayed Hassanein
+          gewidmet. 🖤
+        </p>
       </footer>
     </div>
   );
