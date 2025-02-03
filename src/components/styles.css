@@ -1,0 +1,347 @@
+@import url('https://fonts.googleapis.com/css2?family=Reem+Kufi:wght@400..700&display=swap');
+
+body {
+    font-family: 'Reem Kufi', sans-serif;
+    background-color: #f0efed;
+}
+
+.reem-kufi {
+    font-family: 'Reem Kufi', sans-serif;
+}
+
+.container {
+    max-width: 100%;
+    padding: 20px;
+    text-align: center;
+    background-color: #f9fafb;
+    border-radius: 15px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.title {
+    font-size: 1.5rem; /* تعديل الحجم ليناسب الأجهزة الصغيرة */
+}
+
+.description {
+    font-size: 1rem;
+    margin-bottom: 20px;
+}
+
+.login-box {
+    margin-bottom: 20px;
+    text-align: right; /* لجعل النص يظهر في الجهة اليمنى */
+}
+
+
+.input {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 1rem;
+    outline: none;
+    transition: border-color 0.3s ease;
+    direction: rtl; /* تأكد من أن النص داخل الحقل يظهر بشكل صحيح في الكتابة من اليمين لليسار */
+}
+
+.input:focus {
+    border-color: #4c51bf;
+}
+
+.button {
+    display: block; /* لجعل الزر يظهر ككتلة */
+    margin: 0 auto; /* هذا سيجعل الزر في المنتصف */
+    padding: 10px 20px;
+    border: none;
+    color: white;
+    background-color: #3f4753cf;
+    cursor: pointer;
+    margin-top: 10px;
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.button:hover {
+    transform: translateY(-2px);
+    background-color: #252b2e;
+}
+
+.button.logout {
+    background-color: #ef4444;
+}
+
+.button.logout:hover {
+    background-color: #dc2626;
+}
+
+.user-info {
+    margin-bottom: 20px;
+}
+
+.user-info p {
+    font-size: 1.2rem;
+    color: #2d3748;
+}
+
+.color-picker {
+    margin-bottom: 20px;
+}
+
+.color-picker p {
+    font-size: 1rem;
+    color: #4a5568;
+    margin-bottom: 10px;
+}
+
+.colors {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.color-btn {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    cursor: pointer;
+    border: 2px solid transparent;
+    transition: transform 0.2s ease, border-color 0.3s ease;
+}
+
+.color-btn:hover {
+    transform: scale(1.1);
+    border-color: #4c51bf;
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 15px;
+    margin-top: 20px;
+}
+
+.part-box {
+    padding: 20px;
+    color: white;
+    font-weight: bold;
+    border-radius: 10px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    background-color: #e2e8f0;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.part-box:hover {
+    transform: scale(1.05);
+}
+
+.user-name {
+    font-size: 0.8rem;
+    margin-top: 5px;
+    color: #4a5568;
+}
+
+.completion-message {
+    margin-top: 20px;
+    padding: 15px;
+    background-color: #48bb78;
+    color: white;
+    border-radius: 10px;
+    font-size: 1.2rem;
+}
+
+.completion-message .button.reset {
+    background-color: #ffffff;
+    color: #48bb78;
+    margin-top: 10px;
+}
+
+.completion-message .button.reset:hover {
+    background-color: #f0fff4;
+}
+.footer {
+    margin-top: 40px;
+    padding: 20px;
+    background-color: #f9fafb;
+    border-top: 1px solid #e2e8f0;
+    text-align: center;
+    font-size: 1rem;
+    color: #4a5568;
+  }
+  
+  .footer p {
+    margin: 5px 0;
+  }
+  .prayer-box {
+    position: fixed;
+    top: 200px;
+    left: 30px;
+    background-color: rgba(0, 0, 0, 0.7);
+    color: white;
+    padding: 3px;
+    border-radius: 7px;
+    font-size: 0.7rem;
+    z-index: 999;
+    width: auto;
+    max-width: 200px;
+    text-align: center;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  }
+  @media (max-width: 768px) {
+    .title {
+        font-size: 1.3rem; /* أصغر قليلاً على الأجهزة المتوسطة */
+    }
+
+    .description {
+        font-size: 0.9rem;
+    }
+
+    /* تغيير تخطيط الشبكة للأجهزة الصغيرة */
+    .grid {
+        grid-template-columns: repeat(3, 1fr); /* 3 أعمدة على الشاشات المتوسطة */
+    }
+
+    .part-box {
+        padding: 15px;
+        font-size: 1rem; /* تقليص الحجم */
+    }
+
+    /* تكبير الأزرار لتناسب الشاشة الصغيرة */
+    .button {
+        font-size: 0.9rem;
+        padding: 8px 16px;
+    }
+
+    /* تكبير زر اللون */
+    .color-btn {
+        width: 25px;
+        height: 25px;
+    }
+
+    /* تعديل حجم الخط في prayer-box */
+    .prayer-box {
+        position: fixed;
+        top: 190px;
+        left: 20px;
+      
+        background-color: rgba(0, 0, 0, 0.7);
+        color: white;
+        padding: 1px 0px 1px 0px;
+        border-radius: 9px;
+        font-size: 0.7rem;
+        z-index: 999;
+        width: auto;
+        max-width: 190px;
+        text-align: center;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        opacity: 0; /* تأكد من أن العنصر غير مرئي في البداية */
+    }
+    
+}
+@media (max-width: 539px) {
+    .prayer-box {
+        position: fixed;
+        top: 217px;
+        left: 30px;
+        background-color: rgba(0, 0, 0, 0.7);
+        color: white;
+        padding: 0px;
+        border-radius: 7px;
+        font-size: 0.6rem;
+        z-index: 999;
+        width: auto;
+        max-width:25%;
+        text-align: center;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        opacity: 0;
+    }
+}
+
+/* للشاشات الصغيرة جداً (الموبايل) */
+@media (max-width: 480px) {
+    .title {
+        font-size: 1.1rem;
+    }
+
+    .description {
+        font-size: 0.85rem;
+    }
+
+    .grid {
+        grid-template-columns: 1fr; /* عمود واحد على الشاشات الصغيرة */
+    }
+
+    .part-box {
+        padding: 10px;
+        font-size: 0.9rem;
+    }
+
+    .button {
+        font-size: 0.8rem;
+        padding: 6px 12px;
+    }
+
+    .color-picker p {
+        font-size: 0.9rem;
+    }
+    .prayer-box {
+        position: fixed;
+        top: 198px;
+        left: 30px;
+        background-color: rgba(0, 0, 0, 0.7);
+        color: white;
+        padding: 0px;
+        border-radius: 7px;
+        font-size: 0.6rem;
+        z-index: 999;
+        width: auto;
+        max-width:25%;
+        text-align: center;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        opacity: 0;
+    }
+}
+
+@media (max-width: 414px) {
+
+    .prayer-box {
+        position: fixed;
+        top: 207px;
+        left: 30px;
+        background-color: rgba(0, 0, 0, 0.7);
+        color: white;
+        padding: 0px;
+        border-radius: 7px;
+        font-size: 0.6rem;
+        z-index: 999;
+        width: auto;
+        max-width:25%;
+        text-align: center;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        opacity: 0;
+    }
+}
+@media (max-width: 393px) {
+    .prayer-box {
+        position: fixed;
+        top: 222px;
+        left: 30px;
+        background-color: rgba(0, 0, 0, 0.7);
+        color: white;
+        padding: 0px;
+        border-radius: 7px;
+        font-size: 0.6rem;
+        z-index: 999;
+        width: auto;
+        max-width:25%;
+        text-align: center;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        opacity: 0;
+    }
+}
