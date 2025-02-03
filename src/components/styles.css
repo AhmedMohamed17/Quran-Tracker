@@ -28,13 +28,15 @@ body {
 }
 
 .login-box {
+    
     margin-bottom: 20px;
-    text-align: right; /* لجعل النص يظهر في الجهة اليمنى */
+    /* text-align: right;  */
 }
 
 
 .input {
-    width: 100%;
+    
+    width: 70%;
     padding: 10px;
     margin-bottom: 10px;
     border: 1px solid #e2e8f0;
@@ -42,6 +44,7 @@ body {
     font-size: 1rem;
     outline: none;
     transition: border-color 0.3s ease;
+    margin-right:15px;
     direction: rtl; /* تأكد من أن النص داخل الحقل يظهر بشكل صحيح في الكتابة من اليمين لليسار */
 }
 
