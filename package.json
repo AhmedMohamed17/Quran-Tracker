@@ -10,6 +10,7 @@
     "autoprefixer": "^10.4.20",
     "bootstrap": "^5.3.3",
     "cra-template": "1.2.0",
+    "firebase": "^11.2.0",
     "font-awesome": "^4.7.0",
     "framer-motion": "^12.0.6",
     "postcss": "^8.5.1",

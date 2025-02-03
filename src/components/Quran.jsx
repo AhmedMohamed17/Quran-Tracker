@@ -1,6 +1,32 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
+import { initializeApp } from "firebase/app";
+import {
+  getFirestore,
+  doc,
+  setDoc,
+  getDoc,
+  onSnapshot,
+} from "firebase/firestore";
+
 import "./styles.css";
+
+// إعداد Firebase
+const firebaseConfig = {
+  apiKey: "AIzaSyAeRi74HEvd7VhkSg-XgOSHGiJ5tGq4ZCo",
+  authDomain: "quran-7ea22.firebaseapp.com",
+  projectId: "quran-7ea22",
+  storageBucket: "quran-7ea22.firebasestorage.app",
+  messagingSenderId: "1054447362065",
+  appId: "1:1054447362065:web:292326c26abc0b3d5911b0",
+  measurementId: "G-ERWQNNV6VT",
+};
+
+// تهيئة Firebase
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+// الدعاء الذي سيتم عرضه للمستخدمين
 const prayers = [
   "اللهم اغفر للمؤمنين والمؤمنات، الأحياء منهم والأموات.",
   "اللهم اجعلنا من أهل الجنة، واجعلنا من أهل الدعاء.",
@@ -8,6 +34,8 @@ const prayers = [
   "اللهم اجعلنا من الذين يستمعون القول فيتبعون أحسنه.",
   "اللهم احفظنا من كل شر ومن كل مرض، واجعلنا من الفائزين في الدنيا والآخرة.",
 ];
+
+// تعريف الأجزاء والألوان
 const parts = Array.from({ length: 30 }, (_, i) => i + 1);
 const colors = [
   "#f87171",
@@ -43,53 +71,53 @@ const colors = [
 ];
 
 export default function KhatmaTracker() {
-  const [selectedParts, setSelectedParts] = useState(
-    () => JSON.parse(localStorage.getItem("selectedParts")) || {}
-  );
-  const [userNames, setUserNames] = useState(
-    () => JSON.parse(localStorage.getItem("userNames")) || {}
-  );
-  const [userColors, setUserColors] = useState(
-    () => JSON.parse(localStorage.getItem("userColors")) || {}
-  );
-  const [currentUser, setCurrentUser] = useState(
-    () => localStorage.getItem("currentUser") || ""
-  );
-  const [currentColor, setCurrentColor] = useState(
-    () => localStorage.getItem("currentColor") || ""
-  );
+  const [selectedParts, setSelectedParts] = useState({});
+  const [userNames, setUserNames] = useState({});
+  const [userColors, setUserColors] = useState({});
+  const [currentUser, setCurrentUser] = useState("");
+  const [currentColor, setCurrentColor] = useState("");
   const [inputName, setInputName] = useState("");
   const [currentPrayer, setCurrentPrayer] = useState(prayers[0]);
   const [showPrayer, setShowPrayer] = useState(true);
+  const [isCompleted, setIsCompleted] = useState(false); // حالة لتحديد ما إذا كانت الختمة مكتملة
 
+  // تحميل البيانات من Firestore عند التثبيت
   useEffect(() => {
-    localStorage.setItem("selectedParts", JSON.stringify(selectedParts));
-    localStorage.setItem("userNames", JSON.stringify(userNames));
-    localStorage.setItem("userColors", JSON.stringify(userColors));
-    localStorage.setItem("currentColor", currentColor);
-  }, [selectedParts, userNames, userColors, currentColor]);
+    const unsubscribe = onSnapshot(
+      doc(db, "khatmaData", "sharedData"),
+      (docSnap) => {
+        if (docSnap.exists()) {
+          const data = docSnap.data();
+          setSelectedParts(data.selectedParts || {});
+          setUserNames(data.userNames || {});
+          setUserColors(data.userColors || {});
+        }
+      }
+    );
 
-  useEffect(() => {
-    localStorage.setItem("currentUser", currentUser);
-  }, [currentUser]);
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setShowPrayer(true); // إظهار الدعاء الحالي
-
-      // بعد 15 ثانية نقوم بتغيير الدعاء
-      setTimeout(() => {
-        setShowPrayer(false); // إخفاء الدعاء الحالي
-        setTimeout(() => {
-          const randomPrayer =
-            prayers[Math.floor(Math.random() * prayers.length)];
-          setCurrentPrayer(randomPrayer); // تغيير الدعاء
-          setShowPrayer(true); // إظهار الدعاء الجديد
-        }, 9000); // تأخير قصير قبل إظهار الدعاء الجديد
-      }, 9000); // إخفاء الدعاء بعد 15 ثانية
-    }, 9000); // تكرار العملية كل دقيقة
-
-    return () => clearInterval(interval); // تنظيف الـ interval عند الخروج
+    return () => unsubscribe();
   }, []);
+
+  // حفظ البيانات في Firestore
+  useEffect(() => {
+    const saveData = async () => {
+      await setDoc(doc(db, "khatmaData", "sharedData"), {
+        selectedParts,
+        userNames,
+        userColors,
+      });
+    };
+    saveData();
+  }, [selectedParts, userNames, userColors]);
+
+  // التحقق من إذا كانت الختمة مكتملة
+  useEffect(() => {
+    if (Object.keys(selectedParts).length === 30) {
+      setIsCompleted(true);
+    } else {
+      setIsCompleted(false);
+    }
+  }, [selectedParts]);
 
   const selectColor = (color) => {
     setCurrentColor(color);
@@ -109,6 +137,7 @@ export default function KhatmaTracker() {
       alert("لا يمكنك تعديل اختيار مستخدم آخر.");
       return;
     }
+
     setSelectedParts((prev) => {
       const newParts = { ...prev };
       const newUserNames = { ...userNames };
@@ -124,13 +153,6 @@ export default function KhatmaTracker() {
     });
   };
 
-  const resetKhatma = () => {
-    setSelectedParts({});
-    setUserNames({});
-    setUserColors({});
-    setCurrentColor("");
-  };
-
   const handleLogin = () => {
     if (inputName.trim().length < 3) {
       alert("يرجى إدخال اسمك الكامل (على الأقل 3 أحرف)");
@@ -138,6 +160,16 @@ export default function KhatmaTracker() {
     }
     setCurrentUser(inputName.trim());
     setInputName("");
+  };
+
+  // دالة لإعادة البدء من جديد
+  const restart = () => {
+    setSelectedParts({});
+    setUserNames({});
+    setUserColors({});
+    setIsCompleted(false);
+    setCurrentUser("");
+    setCurrentColor("");
   };
 
   return (
@@ -149,6 +181,7 @@ export default function KhatmaTracker() {
         اللهم اغفر لها ولهم وارحمها واسكنهم جميعًا الفردوس الأعلى من الجنة بدون
         حساب ولا سابقة عذاب، اللهم آمين
       </p>
+
       {!currentUser ? (
         <div className="login-box">
           <input
@@ -173,6 +206,7 @@ export default function KhatmaTracker() {
           </button>
         </div>
       )}
+
       {currentUser && !currentColor && (
         <div className="color-picker">
           <p className="reem-kufi">اختر لونك المميز:</p>
@@ -188,6 +222,7 @@ export default function KhatmaTracker() {
           </div>
         </div>
       )}
+
       <div className="grid">
         {parts.map((part) => (
           <motion.div
@@ -202,30 +237,33 @@ export default function KhatmaTracker() {
           </motion.div>
         ))}
       </div>
-      {Object.keys(selectedParts).length === 30 && (
+
+      {isCompleted && (
         <div className="completion-message">
           <p className="reem-kufi">تم إكمال الختمة! 🎉</p>
-          <button className="button reset reem-kufi" onClick={resetKhatma}>
-            إعادة التعيين
-          </button>
         </div>
       )}
-      {/* Display prayer */}
+
+      {/* عرض الدعاء */}
       <motion.div
         className="prayer-box"
-        initial={{ opacity: 0, x: "-100%" }} // بداية العنصر مخفي على اليسار
-        animate={{ opacity: 1, x: 0 }} // التأثير بالظهور من اليسار
-        transition={{ type: "spring", stiffness: 100, damping: 25 }} // إضافة تأثير الارتداد (bounce)
+        initial={{ opacity: 0, x: "-100%" }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ type: "spring", stiffness: 100, damping: 25 }}
       >
         <p className="reem-kufi">{currentPrayer}</p>
       </motion.div>
+
+      {/* زر لإعادة البدء */}
+      {isCompleted && (
+        <button className="button restart reem-kufi" onClick={restart}>
+          ابدأ من جديد
+        </button>
+      )}
+
       {/* Footer */}
       <footer className="footer reem-kufi">
         <p> 🖤 إهداء لصديقي العزيز محمد سيد حسنين</p>
-        <p>
-          Dieses Werk ist meinem lieben Freund Muhammad Sayed Hassanein
-          gewidmet. 🖤
-        </p>
       </footer>
     </div>
   );
