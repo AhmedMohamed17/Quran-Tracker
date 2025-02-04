@@ -92,18 +92,6 @@ export default function KhatmaTracker() {
   const [isCompleted, setIsCompleted] = useState(false);
 
   useEffect(() => {
-    localStorage.setItem("selectedParts", JSON.stringify(selectedParts));
-    localStorage.setItem("userNames", JSON.stringify(userNames));
-    localStorage.setItem("userColors", JSON.stringify(userColors));
-
-    setDoc(doc(db, "khatmaData", "sharedData"), {
-      selectedParts,
-      userNames,
-      userColors,
-    });
-  }, [selectedParts, userNames, userColors]);
-  // تحميل البيانات من Firestore عند التثبيت
-  useEffect(() => {
     const unsubscribe = onSnapshot(
       doc(db, "khatmaData", "sharedData"),
       (docSnap) => {
@@ -112,13 +100,31 @@ export default function KhatmaTracker() {
           setSelectedParts(data.selectedParts || {});
           setUserNames(data.userNames || {});
           setUserColors(data.userColors || {});
+
+          // تخزين البيانات في localStorage إذا لم تكن موجودة
+          if (!localStorage.getItem("selectedParts")) {
+            localStorage.setItem(
+              "selectedParts",
+              JSON.stringify(data.selectedParts)
+            );
+          }
+          if (!localStorage.getItem("userNames")) {
+            localStorage.setItem("userNames", JSON.stringify(data.userNames));
+          }
+          if (!localStorage.getItem("userColors")) {
+            localStorage.setItem("userColors", JSON.stringify(data.userColors));
+          }
         }
       }
     );
 
     return () => unsubscribe();
   }, []);
-
+  useEffect(() => {
+    localStorage.setItem("selectedParts", JSON.stringify(selectedParts));
+    localStorage.setItem("userNames", JSON.stringify(userNames));
+    localStorage.setItem("userColors", JSON.stringify(userColors));
+  }, [selectedParts, userNames, userColors]);
   // حفظ البيانات في Firestore
   useEffect(() => {
     const saveData = async () => {
