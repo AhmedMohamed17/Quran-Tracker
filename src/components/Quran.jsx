@@ -138,7 +138,12 @@ export default function KhatmaTracker() {
     } else {
       setIsCompleted(false);
     }
-  }, [selectedParts]);
+
+    // مسح البيانات من localStorage عند اكتمال الختمة
+    if (isCompleted) {
+      localStorage.clear();
+    }
+  }, [selectedParts, isCompleted]);
 
   const selectColor = (color) => {
     if (Object.keys(selectedParts).length > 0) {
