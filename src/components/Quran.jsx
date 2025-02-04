@@ -76,16 +76,32 @@ const colors = [
 ];
 
 export default function KhatmaTracker() {
-  const [selectedParts, setSelectedParts] = useState({});
-  const [userNames, setUserNames] = useState({});
-  const [userColors, setUserColors] = useState({});
+  const [selectedParts, setSelectedParts] = useState(
+    JSON.parse(localStorage.getItem("selectedParts")) || {}
+  );
+  const [userNames, setUserNames] = useState(
+    JSON.parse(localStorage.getItem("userNames")) || {}
+  );
+  const [userColors, setUserColors] = useState(
+    JSON.parse(localStorage.getItem("userColors")) || {}
+  );
   const [currentUser, setCurrentUser] = useState("");
   const [currentColor, setCurrentColor] = useState("");
   const [inputName, setInputName] = useState("");
   const [currentPrayer, setCurrentPrayer] = useState(prayers[0]);
-  const [showPrayer, setShowPrayer] = useState(true);
-  const [isCompleted, setIsCompleted] = useState(false); // حالة لتحديد ما إذا كانت الختمة مكتملة
+  const [isCompleted, setIsCompleted] = useState(false);
 
+  useEffect(() => {
+    localStorage.setItem("selectedParts", JSON.stringify(selectedParts));
+    localStorage.setItem("userNames", JSON.stringify(userNames));
+    localStorage.setItem("userColors", JSON.stringify(userColors));
+
+    setDoc(doc(db, "khatmaData", "sharedData"), {
+      selectedParts,
+      userNames,
+      userColors,
+    });
+  }, [selectedParts, userNames, userColors]);
   // تحميل البيانات من Firestore عند التثبيت
   useEffect(() => {
     const unsubscribe = onSnapshot(
@@ -125,8 +141,13 @@ export default function KhatmaTracker() {
   }, [selectedParts]);
 
   const selectColor = (color) => {
+    if (Object.keys(selectedParts).length > 0) {
+      alert("لا يمكنك تغيير اللون بعد بدء الخاتمة.");
+      return;
+    }
     setCurrentColor(color);
     setUserColors((prev) => ({ ...prev, [currentUser]: color }));
+    localStorage.setItem("currentColor", JSON.stringify(color));
   };
 
   const togglePart = (part) => {
@@ -165,6 +186,12 @@ export default function KhatmaTracker() {
     }
     setCurrentUser(inputName.trim());
     setInputName("");
+
+    // تحميل اللون المحفوظ للمستخدم إذا وجد
+    const savedColor = JSON.parse(localStorage.getItem("currentColor"));
+    if (savedColor) {
+      setCurrentColor(savedColor);
+    }
   };
 
   // دالة لإعادة البدء من جديد
@@ -174,7 +201,8 @@ export default function KhatmaTracker() {
     setUserColors({});
     setIsCompleted(false);
     setCurrentUser("");
-    setCurrentColor("");
+    setCurrentColor(""); // إعادة تعيين اللون
+    localStorage.clear();
   };
 
   return (
@@ -269,10 +297,6 @@ export default function KhatmaTracker() {
       {/* Footer */}
       <footer className="footer reem-kufi">
         <p> 🖤 إهداء لصديقي العزيز محمد سيد حسنين</p>
-        <p>
-          Dieses Werk ist meinem lieben Freund Muhammad Sayed Hassanein
-          gewidmet. 🖤
-        </p>
       </footer>
     </div>
   );
