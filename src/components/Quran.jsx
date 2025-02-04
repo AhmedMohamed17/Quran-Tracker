@@ -1,17 +1,9 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { initializeApp } from "firebase/app";
-import {
-  getFirestore,
-  doc,
-  setDoc,
-  getDoc,
-  onSnapshot,
-} from "firebase/firestore";
-
+import { getFirestore, doc, setDoc, onSnapshot } from "firebase/firestore";
 import "./styles.css";
 
-// إعداد Firebase
 const firebaseConfig = {
   apiKey: "AIzaSyAeRi74HEvd7VhkSg-XgOSHGiJ5tGq4ZCo",
   authDomain: "quran-7ea22.firebaseapp.com",
@@ -22,11 +14,9 @@ const firebaseConfig = {
   measurementId: "G-ERWQNNV6VT",
 };
 
-// تهيئة Firebase
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-// الدعاء الذي سيتم عرضه للمستخدمين
 const prayers = [
   "اللّهُمَّ اغْسِلْنى مِن الذنوب، وَطَهِّرْنى مِنَ الْعُيُوبِ",
   "اللَّهُمَّ ارْزُقْنِي السِّتْرَ وَالْعَفَافَ، وَأَلْبِسْنِي لِبَاسَ الْقُنُوعِ وَ الْكَفَافِ",
@@ -40,7 +30,6 @@ const prayers = [
   "ٌقل الحمدلله",
 ];
 
-// تعريف الأجزاء والألوان
 const parts = Array.from({ length: 30 }, (_, i) => i + 1);
 const colors = [
   "#f87171",
@@ -61,35 +50,17 @@ const colors = [
   "#f59e0b",
   "#0ea5e9",
   "#6b7280",
-  "#78716c",
-  "#71717a",
-  "#a3a3a3",
-  "#64748b",
-  "#f87171",
-  "#60a5fa",
-  "#34d399",
-  "#facc15",
-  "#a78bfa",
-  "#f472b6",
-  "#818cf8",
-  "#14b8a6",
 ];
 
 export default function KhatmaTracker() {
-  const [selectedParts, setSelectedParts] = useState(
-    JSON.parse(localStorage.getItem("selectedParts")) || {}
-  );
-  const [userNames, setUserNames] = useState(
-    JSON.parse(localStorage.getItem("userNames")) || {}
-  );
-  const [userColors, setUserColors] = useState(
-    JSON.parse(localStorage.getItem("userColors")) || {}
-  );
+  const [selectedParts, setSelectedParts] = useState({});
+  const [userNames, setUserNames] = useState({});
+  const [userColors, setUserColors] = useState({});
   const [currentUser, setCurrentUser] = useState("");
   const [currentColor, setCurrentColor] = useState("");
   const [inputName, setInputName] = useState("");
-  const [currentPrayer, setCurrentPrayer] = useState(prayers[0]);
   const [isCompleted, setIsCompleted] = useState(false);
+  const [currentPrayer, setCurrentPrayer] = useState(prayers[0]);
 
   useEffect(() => {
     const unsubscribe = onSnapshot(
@@ -100,122 +71,69 @@ export default function KhatmaTracker() {
           setSelectedParts(data.selectedParts || {});
           setUserNames(data.userNames || {});
           setUserColors(data.userColors || {});
-
-          // تخزين البيانات في localStorage إذا لم تكن موجودة
-          if (!localStorage.getItem("selectedParts")) {
-            localStorage.setItem(
-              "selectedParts",
-              JSON.stringify(data.selectedParts)
-            );
-          }
-          if (!localStorage.getItem("userNames")) {
-            localStorage.setItem("userNames", JSON.stringify(data.userNames));
-          }
-          if (!localStorage.getItem("userColors")) {
-            localStorage.setItem("userColors", JSON.stringify(data.userColors));
-          }
         }
       }
     );
-
     return () => unsubscribe();
   }, []);
-  useEffect(() => {
-    localStorage.setItem("selectedParts", JSON.stringify(selectedParts));
-    localStorage.setItem("userNames", JSON.stringify(userNames));
-    localStorage.setItem("userColors", JSON.stringify(userColors));
-  }, [selectedParts, userNames, userColors]);
-  // حفظ البيانات في Firestore
-  useEffect(() => {
-    const saveData = async () => {
-      await setDoc(doc(db, "khatmaData", "sharedData"), {
-        selectedParts,
-        userNames,
-        userColors,
-      });
-    };
-    saveData();
-  }, [selectedParts, userNames, userColors]);
 
-  // التحقق من إذا كانت الختمة مكتملة
   useEffect(() => {
-    if (Object.keys(selectedParts).length === 30) {
-      setIsCompleted(true);
-    } else {
-      setIsCompleted(false);
-    }
+    setIsCompleted(Object.keys(selectedParts).length === 30);
+  }, [selectedParts]);
 
-    // مسح البيانات من localStorage عند اكتمال الختمة
-    if (isCompleted) {
-      localStorage.clear();
-    }
-  }, [selectedParts, isCompleted]);
-
-  const selectColor = (color) => {
-    if (Object.keys(selectedParts).length > 0) {
-      alert("لا يمكنك تغيير اللون بعد بدء الخاتمة.");
-      return;
-    }
-    setCurrentColor(color);
-    setUserColors((prev) => ({ ...prev, [currentUser]: color }));
-    localStorage.setItem("currentColor", JSON.stringify(color));
+  const saveData = async (updatedParts, updatedNames, updatedColors) => {
+    await setDoc(doc(db, "khatmaData", "sharedData"), {
+      selectedParts: updatedParts,
+      userNames: updatedNames,
+      userColors: updatedColors,
+    });
   };
 
-  const togglePart = (part) => {
-    if (!currentUser.trim()) {
-      alert("يرجى إدخال اسمك الكامل قبل اختيار جزء.");
-      return;
-    }
-    if (!currentColor) {
-      alert("يرجى اختيار لون قبل تحديد جزء.");
+  const togglePart = async (part) => {
+    if (!currentUser || !currentColor) {
+      alert("يرجى إدخال اسمك واختيار لون قبل تحديد جزء.");
       return;
     }
     if (selectedParts[part] && userNames[part] !== currentUser) {
       alert("لا يمكنك تعديل اختيار مستخدم آخر.");
       return;
     }
+    const updatedParts = { ...selectedParts };
+    const updatedNames = { ...userNames };
+    const updatedColors = { ...userColors };
 
-    setSelectedParts((prev) => {
-      const newParts = { ...prev };
-      const newUserNames = { ...userNames };
-      if (newParts[part]) {
-        delete newParts[part];
-        delete newUserNames[part];
-      } else {
-        newParts[part] = currentColor;
-        newUserNames[part] = currentUser;
-      }
-      setUserNames(newUserNames);
-      return newParts;
-    });
+    if (updatedParts[part]) {
+      delete updatedParts[part];
+      delete updatedNames[part];
+      delete updatedColors[part];
+    } else {
+      updatedParts[part] = currentColor;
+      updatedNames[part] = currentUser;
+      updatedColors[part] = currentColor;
+    }
+    await saveData(updatedParts, updatedNames, updatedColors);
   };
 
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentPrayer(prayers[Math.floor(Math.random() * prayers.length)]);
+    }, 10000);
+    return () => clearInterval(interval);
+  }, []);
   const handleLogin = () => {
-    if (inputName.trim().length < 3) {
-      alert("يرجى إدخال اسمك الكامل (على الأقل 3 أحرف)");
+    if (!inputName.trim()) {
+      alert("يرجى إدخال اسمك أولًا");
       return;
     }
-    setCurrentUser(inputName.trim());
-    setInputName("");
-
-    // تحميل اللون المحفوظ للمستخدم إذا وجد
-    const savedColor = JSON.parse(localStorage.getItem("currentColor"));
-    if (savedColor) {
-      setCurrentColor(savedColor);
-    }
+    setCurrentUser(inputName);
   };
-
-  // دالة لإعادة البدء من جديد
-  const restart = () => {
+  const restart = async () => {
+    await saveData({}, {}, {});
     setSelectedParts({});
     setUserNames({});
     setUserColors({});
     setIsCompleted(false);
-    setCurrentUser("");
-    setCurrentColor(""); // إعادة تعيين اللون
-    localStorage.clear();
   };
-
   return (
     <div className="container">
       <h2 className="title reem-kufi">
@@ -244,7 +162,10 @@ export default function KhatmaTracker() {
           <p className="reem-kufi">مرحبًا، {currentUser}</p>
           <button
             className="button logout reem-kufi"
-            onClick={() => setCurrentUser("")}
+            onClick={() => {
+              setCurrentUser("");
+              setCurrentColor("");
+            }}
           >
             تسجيل الخروج
           </button>
@@ -260,7 +181,7 @@ export default function KhatmaTracker() {
                 key={color}
                 className="color-btn"
                 style={{ backgroundColor: color }}
-                onClick={() => selectColor(color)}
+                onClick={() => setCurrentColor(color)}
               />
             ))}
           </div>
@@ -307,7 +228,7 @@ export default function KhatmaTracker() {
 
       {/* Footer */}
       <footer className="footer reem-kufi">
-        <p> 🖤 إهداء لصديقي العزيز محمد سيد حسنين</p>
+        <p> 🧡 إهداء لصديقي العزيز محمد سيد حسنين</p>
       </footer>
     </div>
   );
