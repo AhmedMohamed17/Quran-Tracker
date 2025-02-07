@@ -61,6 +61,7 @@ export default function KhatmaTracker() {
   const [inputName, setInputName] = useState("");
   const [isCompleted, setIsCompleted] = useState(false);
   const [currentPrayer, setCurrentPrayer] = useState(prayers[0]);
+  const [completedCount, setCompletedCount] = useState(0); // إضافة عدد الختمات المكتملة
 
   useEffect(() => {
     const unsubscribe = onSnapshot(
@@ -71,6 +72,7 @@ export default function KhatmaTracker() {
           setSelectedParts(data.selectedParts || {});
           setUserNames(data.userNames || {});
           setUserColors(data.userColors || {});
+          setCompletedCount(data.completedCount || 0); // تحديث العدد من قاعدة البيانات
         }
       }
     );
@@ -81,11 +83,17 @@ export default function KhatmaTracker() {
     setIsCompleted(Object.keys(selectedParts).length === 30);
   }, [selectedParts]);
 
-  const saveData = async (updatedParts, updatedNames, updatedColors) => {
+  const saveData = async (
+    updatedParts,
+    updatedNames,
+    updatedColors,
+    updatedCount
+  ) => {
     await setDoc(doc(db, "khatmaData", "sharedData"), {
       selectedParts: updatedParts,
       userNames: updatedNames,
       userColors: updatedColors,
+      completedCount: updatedCount, // حفظ عدد الختمات المكتملة
     });
   };
 
@@ -111,7 +119,7 @@ export default function KhatmaTracker() {
       updatedNames[part] = currentUser;
       updatedColors[part] = currentColor;
     }
-    await saveData(updatedParts, updatedNames, updatedColors);
+    await saveData(updatedParts, updatedNames, updatedColors, completedCount); // حفظ البيانات مع عدد الختمات
   };
 
   useEffect(() => {
@@ -120,6 +128,7 @@ export default function KhatmaTracker() {
     }, 10000);
     return () => clearInterval(interval);
   }, []);
+
   const handleLogin = () => {
     if (!inputName.trim()) {
       alert("يرجى إدخال اسمك أولًا");
@@ -127,13 +136,23 @@ export default function KhatmaTracker() {
     }
     setCurrentUser(inputName);
   };
+
   const restart = async () => {
-    await saveData({}, {}, {});
+    await saveData({}, {}, {}, completedCount); // لا نغير عدد الختمات عند إعادة البدء
     setSelectedParts({});
     setUserNames({});
     setUserColors({});
     setIsCompleted(false);
   };
+
+  useEffect(() => {
+    if (isCompleted) {
+      const updatedCount = completedCount + 1;
+      setCompletedCount(updatedCount);
+      saveData(selectedParts, userNames, userColors, updatedCount);
+    }
+  }, [isCompleted]);
+
   return (
     <div className="container">
       <h2 className="title reem-kufi">
@@ -218,6 +237,11 @@ export default function KhatmaTracker() {
       >
         <p className="reem-kufi">{currentPrayer}</p>
       </motion.div>
+
+      {/* عرض عدد الختمات المكتملة */}
+      <div className="completion-info">
+        <p className="reem-kufi">عدد الختمات المكتملة: {completedCount}</p>
+      </div>
 
       {/* زر لإعادة البدء */}
       {isCompleted && (
